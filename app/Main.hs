@@ -1,9 +1,12 @@
 module Main where
 
-import FiniteAutomata (NFA)
+import EpsRemoval
+import FiniteAutomata
 import Parsing (parseInput)
 import System.Environment (getArgs)
 import System.IO (Handle, IOMode (ReadMode), hClose, hGetLine, hIsEOF, openFile)
+import UnachieveableRemoval
+import Utils (join)
 
 main :: IO ()
 main = do
@@ -39,15 +42,38 @@ readLines file = do
 startMinimizing :: Either String NFA -> IO ()
 startMinimizing (Left err) = do
   putStrLn $ red "[-]" ++ " Parsing error: \n\t" ++ err
-startMinimizing (Right nfa) = do
+startMinimizing (Right epsNfa) = do
   putStrLn $ green "[+]" ++ " Parsing successfull"
   putStrLn $ green "[+]" ++ " Loaded automata:\n---"
-  print nfa
+  print epsNfa
   putStrLn "---"
   putStrLn $ green "[+]" ++ " Minimizing starts"
+
+  let achievableNfa = removeUnachieveable epsNfa
+  printUnusedSymbols epsNfa achievableNfa
+  printUnachieveableStates epsNfa achievableNfa
+  putStrLn $ green "[+]" ++ " Automata without unnecessary elements:\n---"
+  print achievableNfa
+  putStrLn "---"
+  let nfa = removeEpsTransitions achievableNfa
+  putStrLn $ green "[+]" ++ " Automata without epsilon transitions:\n---"
+  print nfa
+  putStrLn "---"
 
 red :: String -> String
 red str = "\ESC[31m" ++ str ++ "\ESC[0m"
 
 green :: String -> String
 green str = "\ESC[32m" ++ str ++ "\ESC[0m"
+
+printUnusedSymbols :: NFA -> NFA -> IO ()
+printUnusedSymbols before after = do
+  let (NFA _ inputSymbols _ _ _) = before
+  let (NFA _ achSymbols _ _ _) = after
+  putStrLn $ green "[+]" ++ " Unused symbols: " ++ join "," (filter (`notElem` achSymbols) inputSymbols)
+
+printUnachieveableStates :: NFA -> NFA -> IO ()
+printUnachieveableStates before after = do
+  let (NFA inputStates _ _ _ _) = before
+  let (NFA achStates _ _ _ _) = after
+  putStrLn $ green "[+]" ++ " Unachieveable states: " ++ join "," (filter (`notElem` achStates) inputStates)

@@ -1,4 +1,4 @@
-module Parsing where
+module Parsing (parseInput) where
 
 import FiniteAutomata
 import Utils (split)
@@ -19,7 +19,7 @@ parseInput lns
     nonExistingSymbols = findNonExistingSymbols delta alphabet
 
 variableCharset :: String
-variableCharset = ['a' .. 'z'] ++ ['A' .. 'Z'] ++ ['0' .. '1'] ++ "_"
+variableCharset = ['a' .. 'z'] ++ ['A' .. 'Z'] ++ ['0' .. '9'] ++ "_-/\\!@#$%^&*()+=[]|\"'<>?`."
 
 tokenCharset :: String
 tokenCharset = variableCharset ++ "={},;->"

@@ -7,11 +7,19 @@ newtype State = State String
 instance Show State where
   show (State str) = str
 
+instance Eq State where
+  (==) (State x) (State y) = x == y
+
 data Label = Eps | Label String
 
 instance Show Label where
   show Eps = "_"
   show (Label str) = str
+
+instance Eq Label where
+  (==) (Label x) (Label y) = x == y
+  (==) Eps Eps = True
+  (==) _ _ = False
 
 newtype NFADelta = NFADelta [(State, Label, [State])]
 
@@ -70,17 +78,3 @@ instance Show DFA where
       ++ join "," finishes
       ++ "}\n"
       ++ show delta
-
-q = State "q"
-
-q2 = State "q2"
-
-a = Label "a"
-
-n = NFADelta [(q, a, [q2, q]), (q, Eps, [q2])]
-
-d = DFADelta [(q, a, q)]
-
-na = NFA [q, q2] [a, Eps] q [q2] n
-
-da = DFA [q, q2] [a] q [q2] d
