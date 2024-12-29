@@ -62,7 +62,7 @@ executable min-dfa
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules: FiniteAutomata, Parsing, Utils, EpsRemoval, UnachieveableRemoval
+    other-modules: FiniteAutomata, Parsing, Utils, EpsRemoval, UnachieveableRemoval, Determinisation
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

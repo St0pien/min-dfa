@@ -1,10 +1,16 @@
-module UnachieveableRemoval (removeUnachieveable) where
+module UnachieveableRemoval  where
 
 import FiniteAutomata
 import Utils
 
-removeUnachieveable :: NFA -> NFA
-removeUnachieveable (NFA states alphabet start accepts delta) = NFA achievable (correspondingAlphabet cleanedDelta) start accepts cleanedDelta
+removeUnachieveableDfa :: DFA -> DFA
+removeUnachieveableDfa (DFA states alphabet start accepts (DFADelta transitions)) = DFA newStates newAlphabet newStart newAccepts (DFADelta (map (\(f, s, t) -> (f, s, head t)) newTransitions))
+  where
+    toNfa = NFA states alphabet start accepts (NFADelta $ map (\(f, s, t) -> (f, s, [t])) transitions)
+    (NFA newStates newAlphabet newStart newAccepts (NFADelta newTransitions)) = removeUnachieveableNfa toNfa
+
+removeUnachieveableNfa :: NFA -> NFA
+removeUnachieveableNfa (NFA states alphabet start accepts delta) = NFA achievable (correspondingAlphabet cleanedDelta) start (filter (`elem` achievable) accepts) cleanedDelta
   where
     achievable = findAchieveable (NFA states alphabet start accepts delta)
     cleanedDelta = correspondingTransitions achievable delta

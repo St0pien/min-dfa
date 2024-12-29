@@ -1,5 +1,6 @@
 module Main where
 
+import Determinisation
 import EpsRemoval
 import FiniteAutomata
 import Parsing (parseInput)
@@ -49,7 +50,7 @@ startMinimizing (Right epsNfa) = do
   putStrLn "---"
   putStrLn $ green "[+]" ++ " Minimizing starts"
 
-  let achievableNfa = removeUnachieveable epsNfa
+  let achievableNfa = removeUnachieveableNfa epsNfa
   printUnusedSymbols epsNfa achievableNfa
   printUnachieveableStates epsNfa achievableNfa
   putStrLn $ green "[+]" ++ " Automata without unnecessary elements:\n---"
@@ -59,6 +60,9 @@ startMinimizing (Right epsNfa) = do
   putStrLn $ green "[+]" ++ " Automata without epsilon transitions:\n---"
   print nfa
   putStrLn "---"
+  putStrLn "---\n\n\n"
+  let dfa = determinise nfa
+  print dfa
 
 red :: String -> String
 red str = "\ESC[31m" ++ str ++ "\ESC[0m"
