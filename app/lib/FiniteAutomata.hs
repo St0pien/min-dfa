@@ -61,7 +61,7 @@ instance Show NFADelta where
     "delta = \n"
       ++ concatMap
         ( \(from, label, StateSet to) ->
-            "\t" ++ show from ++ "," ++ show label ++ " -> " ++ join "," to ++ ";\n"
+            "\t" ++ show from ++ "," ++ show label ++ " -> " ++ joinStrings "," to ++ ";\n"
         )
         transitions
 
