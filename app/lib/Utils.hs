@@ -24,10 +24,6 @@ split sep xs
   where
     rest = split sep (tail xs)
 
-removeDuplicates :: (Eq a) => [a] -> [a]
-removeDuplicates [] = []
-removeDuplicates (x : xs) = if x `elem` xs then removeDuplicates xs else x : removeDuplicates xs
-
 powerSet :: [a] -> [[a]]
 powerSet [] = [[]]
 powerSet (x : xs) = map (x :) sub ++ sub
@@ -40,3 +36,10 @@ sort (x : xs) = sort less ++ [x] ++ sort greater
   where
     less = filter (< x) xs
     greater = filter (>= x) xs
+
+removeDuplicates :: (Eq a, Ord a) => [a] -> [a]
+removeDuplicates l = r $ sort l
+  where
+    r [] = []
+    r [x] = [x]
+    r (x : y : xs) = if x == y then r (y : xs) else x : r (y : xs)

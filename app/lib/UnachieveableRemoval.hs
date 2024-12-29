@@ -1,38 +1,30 @@
-module UnachieveableRemoval  where
+module UnachieveableRemoval(removeUnachieveableDfa, removeUnachieveableNfa) where
 
 import FiniteAutomata
 import Utils
 
 removeUnachieveableDfa :: DFA -> DFA
-removeUnachieveableDfa (DFA states alphabet start accepts (DFADelta transitions)) = DFA newStates newAlphabet newStart newAccepts (DFADelta (map (\(f, s, t) -> (f, s, head t)) newTransitions))
+removeUnachieveableDfa (DFA _ _ start accepts (DFADelta transitions)) = DFA achieveable newAlphabet start newAccepts (DFADelta cleanedDelta)
   where
-    toNfa = NFA states alphabet start accepts (NFADelta $ map (\(f, s, t) -> (f, s, [t])) transitions)
-    (NFA newStates newAlphabet newStart newAccepts (NFADelta newTransitions)) = removeUnachieveableNfa toNfa
+    achieveable = findAchieveableFrom getNeighborsDfa transitions [] start
+    cleanedDelta = filter (\(f, _, t) -> f `elem` achieveable && t `elem` achieveable) transitions
+    newAlphabet = correspondingAlphabet cleanedDelta
+    newAccepts = filter (`elem` achieveable) accepts
 
 removeUnachieveableNfa :: NFA -> NFA
-removeUnachieveableNfa (NFA states alphabet start accepts delta) = NFA achievable (correspondingAlphabet cleanedDelta) start (filter (`elem` achievable) accepts) cleanedDelta
+removeUnachieveableNfa (NFA states alphabet start accepts (NFADelta transitions)) = NFA achieveable newAlphabet start newAccepts (NFADelta cleanedDelta)
   where
-    achievable = findAchieveable (NFA states alphabet start accepts delta)
-    cleanedDelta = correspondingTransitions achievable delta
+    achieveable = findAchieveableFrom getNeighborsNfa transitions [] start
+    cleanedDelta = filter (\(f, _, StateSet t) -> f `elem` achieveable && not (null t)) $ map (\(f, s, StateSet t) -> (f, s, StateSet (filter (\tt -> State tt `elem` achieveable) t))) transitions
+    newAlphabet = correspondingAlphabet cleanedDelta
+    newAccepts = filter (`elem` achieveable) accepts
 
-findAchieveable :: NFA -> [State]
-findAchieveable (NFA _ _ start _ delta) = findAchieveableFrom delta [] start
-
-findAchieveableFrom :: NFADelta -> [State] -> State -> [State]
-findAchieveableFrom delta result from = newResult ++ filter (`notElem` newResult) achievable
+findAchieveableFrom :: (Eq a, Ord a) => ([(a, Label, b)] -> a -> [a]) -> [(a, Label, b)] -> [a] -> a -> [a]
+findAchieveableFrom getNeighbors transitions result from = newResult ++ filter (`notElem` newResult) achieveable
   where
     newResult = from : result
-    neighbors = filter (`notElem` newResult) $ getNeighbors delta from
-    achievable = removeDuplicates $ concatMap (findAchieveableFrom delta newResult) neighbors
+    neighbors = filter (`notElem` newResult) $ getNeighbors transitions from
+    achieveable = removeDuplicates $ concatMap (findAchieveableFrom getNeighbors transitions newResult) neighbors
 
-getNeighbors :: NFADelta -> State -> [State]
-getNeighbors (NFADelta transitions) from = concatMap (\(_, _, t) -> t) $ filter (\(f, _, _) -> f == from) transitions
-
-correspondingTransitions :: [State] -> NFADelta -> NFADelta
-correspondingTransitions states (NFADelta transitions) =
-  NFADelta $
-    filter (\(f, _, t) -> f `elem` states && not (null t)) $
-      map (\(f, s, t) -> (f, s, filter (`elem` states) t)) transitions
-
-correspondingAlphabet :: NFADelta -> [Label]
-correspondingAlphabet (NFADelta transitions) = filter (/= Eps) $ removeDuplicates $ map (\(_, s, _) -> s) transitions
+correspondingAlphabet :: [(a, Label, b)] -> [Label]
+correspondingAlphabet transitions = filter (/= Eps) $ removeDuplicates $ map (\(_, s, _) -> s) transitions

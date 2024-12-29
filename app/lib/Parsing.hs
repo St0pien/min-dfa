@@ -1,7 +1,7 @@
 module Parsing (parseInput) where
 
 import FiniteAutomata
-import Utils (split)
+import Utils (removeDuplicates, split)
 
 parseInput :: [String] -> Either String NFA
 parseInput lns
@@ -65,6 +65,6 @@ mapDelta delta =
   NFADelta $
     map
       ( \(from, symbol, to) ->
-          (State from, if symbol == "_" then Eps else Label symbol, map State to)
+          (State from, if symbol == "_" then Eps else Label symbol, StateSet $ removeDuplicates to)
       )
       delta

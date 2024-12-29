@@ -60,9 +60,11 @@ startMinimizing (Right epsNfa) = do
   putStrLn $ green "[+]" ++ " Automata without epsilon transitions:\n---"
   print nfa
   putStrLn "---"
-  putStrLn "---\n\n\n"
   let dfa = determinise nfa
+  putStrLn $ green "[+]" ++ " Corresponding DFA before minimization:\n---"
   print dfa
+  putStrLn "---"
+
 
 red :: String -> String
 red str = "\ESC[31m" ++ str ++ "\ESC[0m"
