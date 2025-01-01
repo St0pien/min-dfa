@@ -12,7 +12,7 @@ removeUnachieveableDfa (DFA _ _ start accepts (DFADelta transitions)) = DFA achi
     newAccepts = filter (`elem` achieveable) accepts
 
 removeUnachieveableNfa :: NFA -> NFA
-removeUnachieveableNfa (NFA states alphabet start accepts (NFADelta transitions)) = NFA achieveable newAlphabet start newAccepts (NFADelta cleanedDelta)
+removeUnachieveableNfa (NFA _ _ start accepts (NFADelta transitions)) = NFA achieveable newAlphabet start newAccepts (NFADelta cleanedDelta)
   where
     achieveable = findAchieveableFrom getNeighborsNfa transitions [] start
     cleanedDelta = filter (\(f, _, StateSet t) -> f `elem` achieveable && not (null t)) $ map (\(f, s, StateSet t) -> (f, s, StateSet (filter (\tt -> State tt `elem` achieveable) t))) transitions

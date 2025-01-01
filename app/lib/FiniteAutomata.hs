@@ -26,8 +26,8 @@ mergeAll [] = StateSet []
 mergeAll (x : xs) = foldl merge x xs
 
 instance Show StateSet where
-  show (StateSet []) = "empty"
-  show (StateSet states) = joinStrings "" (sort states)
+  show (StateSet []) = "_empty_"
+  show (StateSet states) = joinStrings "_" (sort states)
 
 instance Eq StateSet where
   (==) (StateSet a) (StateSet b) = all (`elem` b) a && all (`elem` a) b

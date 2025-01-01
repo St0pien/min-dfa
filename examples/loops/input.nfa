@@ -19,9 +19,7 @@ start_state = s
 accept_states = {a00, b11, c010}
 
 delta = 
-    s, _ -> a;
-    s, _ -> b;
-    s, _ -> c;
+    s, _ -> a,b,c;
 
     a, 0 -> a0;
     a0, 0 -> a00;
